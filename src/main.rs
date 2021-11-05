@@ -8,11 +8,11 @@ mod layout;
 use panic_itm;
 use cortex_m::iprintln;
 use cortex_m_rt::entry;
-use stm32f3_discovery::{leds::Leds, stm32f3xx_hal, switch_hal::{ToggleableOutputSwitch, OutputSwitch}};
-use stm32f3xx_hal::prelude::*;
+//use stm32f3_discovery::{leds::Leds, stm32f3xx_hal, switch_hal::{ToggleableOutputSwitch, OutputSwitch}};
+use stm32f3xx_hal::{hal::digital::v2::{IoPin, PinState}, prelude::*};
 pub use stm32f3xx_hal::{
     delay::Delay,
-    gpio::{gpioe, Output, PushPull},
+    gpio::{Output, PushPull},
     hal::blocking::delay::DelayMs,
     pac, usb,
 };
@@ -61,7 +61,10 @@ fn main() -> ! {
     let mut gpiob = device_periphs.GPIOB.split(&mut reset_and_clock_control.ahb);
     let mut gpiod = device_periphs.GPIOD.split(&mut reset_and_clock_control.ahb);
     let mut gpioe = device_periphs.GPIOE.split(&mut reset_and_clock_control.ahb);
-    
+
+    let mut led = gpioe.pe8.into_push_pull_output(&mut gpioe.moder, &mut gpioe.otyper);
+
+    /*    
     let mut leds = Leds::new(
         gpioe.pe8,
         gpioe.pe9,
@@ -74,7 +77,8 @@ fn main() -> ! {
         &mut gpioe.moder,
         &mut gpioe.otyper,
     ).into_array();
-
+    */
+    
     let cols = input_pins!(
         gpiob => [pb10, pb12, pb14],
         gpiod => [pd8, pd10, pd12]
@@ -136,7 +140,7 @@ fn main() -> ! {
     let mut blink = 0;
     loop {
         if blink == 0{
-            leds[0].toggle().unwrap();
+            led.toggle().unwrap();
             blink = 1000;
         } else {
             blink -= 1;

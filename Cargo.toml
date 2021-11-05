@@ -8,7 +8,7 @@ edition = "2018"
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.6"
-stm32f3-discovery = "0.7"
+#stm32f3-discovery = "0.7"
 panic-itm = "0.4"
 
 heapless = "0.7"
@@ -16,8 +16,8 @@ heapless = "0.7"
 usb-device = "0.2"
 
 [dependencies.stm32f3xx-hal]
-version = "0.7"
-features = ["stm32-usbd"]
+version = "0.8"
+features = ["stm32f303xc", "usb", "rt"]
 
 [dependencies.keyberon]
 git = "https://github.com/TeXitoi/keyberon.git"
