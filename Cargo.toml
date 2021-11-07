@@ -23,6 +23,7 @@ embedded-hal = "0.2"
 
 [dependencies.stm32f1xx-hal]
 git = "https://github.com/stm32-rs/stm32f1xx-hal.git"
+#path = "../../stm32f1xx-hal"
 features = ["stm32f103", "rt"]
 
 [dependencies.keyberon]

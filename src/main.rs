@@ -84,7 +84,8 @@ fn main() -> ! {
 
     let mut delay = Delay::new(core_periphs.SYST, clocks);
 
-    let mut itm = core_periphs.ITM;
+    //let mut itm = core_periphs.ITM;
+    //iprintln!(&mut itm.stim[0], "\n\n\n\n");
 
     
     /*
@@ -96,6 +97,7 @@ fn main() -> ! {
 
     let mut gpioa = device_periphs.GPIOA.split();
     let mut gpiob = device_periphs.GPIOB.split();
+    let pb13 = gpiob.pb3;
     let mut gpioc = device_periphs.GPIOC.split();
 
     //let mut led = gpioe.pe8.into_push_pull_output(&mut gpioe.moder, &mut gpioe.otyper);
@@ -173,13 +175,11 @@ fn main() -> ! {
     // This forced reset is needed only for development, without it host
     // will not reset your device when you upload new firmware.
     let pin_dp = {
-        /*
+        
         let mut usb_dp = gpioa.pa12.into_push_pull_output(&mut gpioa.crh);
         usb_dp.set_low();
         cortex_m::asm::delay(clocks.sysclk().0 / 100);
         usb_dp.into_floating_input(&mut gpioa.crh)
-        */
-        gpioa.pa12 //.into_floating_input(&mut gpioa.crh)
     };
     let pin_dm = gpioa.pa11;
 
@@ -214,11 +214,11 @@ fn main() -> ! {
         }
 
         //let pressed_keys = matrix.get().unwrap();
-        /*for event in debouncer
+        for event in debouncer
             .events(matrix.get().unwrap())
         {
             layout.event(event);
-        }*/
+        }
 
         if usb_dev.poll(&mut [&mut usb_class]) {
             use usb_device::class::UsbClass as _;
