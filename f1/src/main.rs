@@ -2,8 +2,6 @@
 #![no_main]
 #![no_std]
 
-mod layout;
-
 #[allow(unused)]
 use panic_itm;
 use cortex_m::iprintln;
@@ -19,6 +17,8 @@ use hal::{
 use embedded_hal::{blocking::delay::DelayMs, digital::v2::{IoPin, PinState}};
 
 use heapless::String;
+
+use siberon::{layout, keyberon};
 
 /*
 macro_rules! input_pins {
