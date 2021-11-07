@@ -22,3 +22,6 @@ features = ["stm32f103", "rt"]
 
 [dependencies.siberon]
 path = "../"
+
+[profile.dev]
+opt-level = 1
