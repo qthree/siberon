@@ -18,7 +18,7 @@ use embedded_hal::{blocking::delay::DelayMs, digital::v2::{IoPin, PinState}};
 
 use heapless::String;
 
-use siberon::{layout, keyberon};
+use siberon::{SiberonActive, keyberon};
 
 macro_rules! input_pins {
     ($($gpio:expr; $cr:ident => [$($pin:ident),*]),*) => {
@@ -74,16 +74,7 @@ fn main() -> ! {
         gpiob; crh => [pb10, pb11]
     );
 
-    use keyberon::{
-        matrix::Matrix,
-        debounce::Debouncer,
-        matrix::PressedKeys,
-        layout::{Layout, CustomEvent},
-        key_code::KbHidReport,
-    };
-    let mut matrix = Matrix::new(cols, rows).unwrap();
-    let mut debouncer = Debouncer::new(PressedKeys::<6, 6>::default(), PressedKeys::default(), 5);
-    let mut layout = Layout::new(crate::layout::LAYERS);
+    let mut siberon = Siberon::init(cols, rows).unwrap();;
 
     // BluePill board has a pull-up resistor on the D+ line.
     // Pull the D+ pin down to send a RESET condition to the USB bus.
@@ -117,11 +108,7 @@ fn main() -> ! {
             blink -= 1;
         }
 
-        for event in debouncer
-            .events(matrix.get().unwrap())
-        {
-            layout.event(event);
-        }
+        siberon.poll();
 
         if usb_dev.poll(&mut [&mut usb_class]) {
             use usb_device::class::UsbClass as _;
@@ -137,7 +124,7 @@ fn main() -> ! {
                     CustomEvent::Release(()) => unsafe { cortex_m::asm::bootload(0x1FFFC800 as _) },
                     _ => (),
                 }*/
-                let report: KbHidReport = layout.keycodes().collect();
+                let report = siberon.report();
                 if usb_class.device_mut().set_keyboard_report(report.clone())
                 {
                     while let Ok(0) = usb_class.write(report.as_bytes()) {
