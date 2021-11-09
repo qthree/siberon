@@ -55,16 +55,6 @@ const APP: () = {
     fn init(c: init::Context) -> init::LateResources {
         static mut USB_BUS: Option<UsbBusAllocator<usb::UsbBusType>> = None;
 
-        /*let mut rcc = c
-            .device
-            .RCC
-            .configure()
-            .hsi48()
-            .enable_crs(c.device.CRS)
-            .sysclk(48.mhz())
-            .pclk(24.mhz())
-            .freeze(&mut c.device.FLASH);*/
-
         let mut flash = c.device.FLASH.constrain();
         let mut rcc = c.device.RCC.constrain();
         let clocks = rcc.cfgr
