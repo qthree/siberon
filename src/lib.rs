@@ -13,7 +13,8 @@ pub use keyberon::debounce::Event;
 use embedded_hal::digital::v2::{InputPin, OutputPin};
 use keyberon::{debounce::Debouncer, matrix::Matrix, matrix::PressedKeys};
 
-const COLS: usize = 6;
+const HALF_COLS: usize = 6;
+const COLS: usize = HALF_COLS*2;
 const ROWS: usize = 6;
 
 pub struct SiberonPassive<C, R>
@@ -21,8 +22,8 @@ where
     C: InputPin,
     R: OutputPin,
 {
-    pub matrix: Matrix<C, R, COLS, ROWS>,
-    pub debouncer: Debouncer<PressedKeys::<COLS, ROWS>>,
+    pub matrix: Matrix<C, R, HALF_COLS, ROWS>,
+    pub debouncer: Debouncer<PressedKeys::<HALF_COLS, ROWS>>,
 }
 
 impl<C, R, E: 'static> SiberonPassive<C, R>
@@ -30,7 +31,7 @@ where
     C: InputPin<Error = E>,
     R: OutputPin<Error = E>,
 {
-    pub fn init(cols: [C; COLS], rows: [R; ROWS]) -> Result<Self, E>
+    pub fn init(cols: [C; HALF_COLS], rows: [R; ROWS]) -> Result<Self, E>
     {
         let matrix = Matrix::new(cols, rows)?;
         let debouncer = Debouncer::new(PressedKeys::default(), PressedKeys::default(), 5);
@@ -52,33 +53,5 @@ fn ser(e: Event) -> [u8; 4] {
     match e {
         Event::Press(i, j) => [b'P', i+b'0', j+b'0', b'\n'],
         Event::Release(i, j) => [b'R', i+b'0', j+b'0', b'\n'],
-    }
-}
-
-fn de(bytes: &[u8]) -> Result<Event, ()> {
-    match *bytes {
-        [b'P', i, j, b'\n'] => Ok(Event::Press(de_digit(i)?, de_digit(j)?)),
-        [b'R', i, j, b'\n'] => Ok(Event::Release(de_digit(i)?, de_digit(j)?)),
-        _ => Err(()),
-    }
-}
-
-fn de_digit(byte: u8) -> Result<u8, ()> {
-    if byte >= b'0' && byte <= b'9' {
-        Ok(byte - b'0')
-    } else {
-        Err(())
-    }
-}
-
-trait ResultExt<T> {
-    fn get(self) -> T;
-}
-impl<T> ResultExt<T> for Result<T, core::convert::Infallible> {
-    fn get(self) -> T {
-        match self {
-            Ok(v) => v,
-            Err(e) => match e {},
-        }
     }
 }

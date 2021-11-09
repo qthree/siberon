@@ -60,8 +60,6 @@ fn main() -> ! {
     
     let mut siberon = SiberonPassive::init(cols, rows).unwrap();
 
-    ufmt::uwriteln!(&mut serial, "Hello World!").void_unwrap();
-
     let mut old_keys = siberon::keyberon::matrix::PressedKeys::<6, 6>::default();
 
     loop {

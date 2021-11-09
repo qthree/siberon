@@ -11,14 +11,15 @@ use stm32f1xx_hal as hal;
 use hal::{
     prelude::*,
     delay::Delay,
-    gpio::{Output, PushPull},
+    gpio::{Input, Output, PushPull, PullUp, ErasedPin},
     pac, usb,
 };
 use embedded_hal::{blocking::delay::DelayMs, digital::v2::{IoPin, PinState}};
 
 use heapless::String;
 
-use siberon::{SiberonActive, keyberon};
+use siberon::{active::SiberonActive, keyberon};
+type Siberon = SiberonActive<ErasedPin<Input<PullUp>>, ErasedPin<Output<PushPull>>>;
 
 macro_rules! input_pins {
     ($($gpio:expr; $cr:ident => [$($pin:ident),*]),*) => {
@@ -108,26 +109,24 @@ fn main() -> ! {
             blink -= 1;
         }
 
-        siberon.poll();
-
         if usb_dev.poll(&mut [&mut usb_class]) {
             use usb_device::class::UsbClass as _;
             usb_class.poll();
         }
 
         if blink % 10 == 0 {
+            let poll = siberon.poll().unwrap();
+            /*match poll.custom_event {
+                CustomEvent::Release(()) => unsafe { cortex_m::asm::bootload(0x1FFFC800 as _) },
+                _ => (),
+            }*/
+
             use usb_device::device::UsbDeviceState;
 
-            let _tick = layout.tick();
             if usb_dev.state() == UsbDeviceState::Configured {
-                /*match tick {
-                    CustomEvent::Release(()) => unsafe { cortex_m::asm::bootload(0x1FFFC800 as _) },
-                    _ => (),
-                }*/
-                let report = siberon.report();
-                if usb_class.device_mut().set_keyboard_report(report.clone())
+                if usb_class.device_mut().set_keyboard_report(poll.report.clone())
                 {
-                    while let Ok(0) = usb_class.write(report.as_bytes()) {
+                    while let Ok(0) = usb_class.write(poll.report.as_bytes()) {
                         if usb_dev.poll(&mut [&mut usb_class]) {
                             use usb_device::class::UsbClass as _;
                             usb_class.poll();

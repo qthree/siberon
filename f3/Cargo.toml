@@ -8,12 +8,16 @@ edition = "2018"
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "=0.7"
-panic-itm = "0.4"
 
+embedded-hal = "0.2"
+usb-device = "0.2"
+panic-itm = "0.4"
 heapless = "0.7"
 
-usb-device = "0.2"
-embedded-hal = "0.2"
+[dependencies.cortex-m-rtic]
+version = "0.5"
+default-features = false
+features = ["cortex-m-7"]
 
 [dependencies.stm32f3xx-hal]
 #version = "0.8"
