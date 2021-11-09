@@ -2,8 +2,7 @@
 #![no_main]
 #![no_std]
 
-#[allow(unused)]
-use panic_itm;
+use panic_itm as _;
 //use stm32f3_discovery::{leds::Leds, stm32f3xx_hal, switch_hal::{ToggleableOutputSwitch, OutputSwitch}};
 use stm32f3xx_hal as hal;
 use hal::{

@@ -2,8 +2,9 @@
 #![no_main]
 #![no_std]
 
-#[allow(unused)]
-use panic_itm;
+//use cortex_m::iprintln;
+//use panic_itm as _;
+use panic_halt as _;
 //use stm32f3_discovery::{leds::Leds, stm32f3xx_hal, switch_hal::{ToggleableOutputSwitch, OutputSwitch}};
 use stm32f1xx_hal as hal;
 use hal::{
@@ -96,14 +97,14 @@ const APP: () = {
         let usb_class = keyberon::new_class(usb_bus, ());
         let usb_dev = keyberon::new_device(usb_bus);
 
-        let timer = timer::Timer::tim3(c.device.TIM3, &clocks).start_count_down(1.khz());
+        let mut timer = timer::Timer::tim3(c.device.TIM3, &clocks).start_count_down(1.khz());
+        timer.listen(timer::Event::Update);
 
         let (tx, rx) = {
             let tx = gpioa.pa9.into_alternate_push_pull(&mut gpioa.crh);
             let rx = gpioa.pa10;
-            let serial = serial::Serial::usart1(c.device.USART1, (tx, rx), &mut afio.mapr, serial::Config::default().baudrate(57600.bps()), clocks);
-            //serial.listen(serial::Event::Rxne);
-            //serial.enable_interrupt(serial::Event::ReceiveDataRegisterNotEmpty);
+            let mut serial = serial::Serial::usart1(c.device.USART1, (tx, rx), &mut afio.mapr, serial::Config::default().baudrate(57600.bps()), clocks);
+            serial.listen(serial::Event::Rxne);
             serial.split()
         };
 
@@ -118,6 +119,9 @@ const APP: () = {
         );
 
         let siberon = Siberon::init(cols, rows).unwrap();
+
+        //let mut itm = c.core.ITM;
+        //iprintln!(&mut itm.stim[0], "Hello world!");
 
         init::LateResources {
             usb_dev,
@@ -135,7 +139,7 @@ const APP: () = {
 
         if let Ok(byte) = c.resources.rx.read() {
             if let Some(event) = BUF.feed(byte) {
-                c.spawn.handle_event(event).unwrap();
+                let _ = c.spawn.handle_event(event);
             }
         }
     }
@@ -185,11 +189,14 @@ const APP: () = {
     )]
     fn tick(mut c: tick::Context) {
         //c.resources.timer.wait().ok();
-        c.resources.timer.clear_update_interrupt_flag();
 
         let poll = c.resources.siberon.lock(|siberon| siberon.poll()).unwrap();
+        //iprintln!(&mut c.resources.itm.stim[0], "{:?}", poll);
 
-        c.spawn.usb_send(poll).unwrap();
+        // ignore Err if usb is disconnected
+        let _ = c.spawn.usb_send(poll);
+
+        c.resources.timer.clear_update_interrupt_flag();
     }
 
     extern "C" {
