@@ -30,4 +30,4 @@ features = ["stm32f303xc", "usb", "rt"]
 path = "../"
 
 [profile.dev]
-opt-level = 1
+#opt-level = 1

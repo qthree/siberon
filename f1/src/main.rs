@@ -62,7 +62,6 @@ const APP: () = {
             .use_hse(8.mhz())
             .sysclk(48.mhz())
             .pclk1(24.mhz())
-            .pclk2(24.mhz())
             .freeze(&mut flash.acr);
     
         assert!(clocks.usbclk_valid());
@@ -144,7 +143,7 @@ const APP: () = {
         }
     }
 
-    #[task(priority = 3, capacity = 8, resources = [siberon])]
+    #[task(priority = 2, capacity = 8, resources = [siberon])]
     fn handle_event(c: handle_event::Context, event: Event) {
         c.resources.siberon.handle_event(event);
     }
@@ -200,9 +199,7 @@ const APP: () = {
     }
 
     extern "C" {
-        fn DMA2_CHANNEL1();
-        fn DMA2_CHANNEL2();
-        fn DMA2_CHANNEL3();
+        fn CAN_RX1();
     }
 };
 
