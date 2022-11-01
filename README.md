@@ -1,4 +1,5 @@
 # Making of Dactyl ManuForm with Rust [firmware](https://github.com/qthree/siberon/tree/firmware)
+![Preview](https://i.imgur.com/Y07CGlA.png)
 1) 3d printing https://imgur.com/a/boDLUcD
 2) Soldering and left half firmware https://imgur.com/a/Em93paU
 3) Right half soldering https://imgur.com/a/XpErauC
